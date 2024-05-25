@@ -1,0 +1,85 @@
+import pygame
+import sys
+import random
+
+# Khởi tạo Pygame
+pygame.init()
+
+# Các biến toàn cục
+WIDTH, HEIGHT = 400, 400
+SNAKE_SIZE = 20
+SNAKE_SPEED = 10
+
+# Màu sắc
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+
+# Tạo cửa sổ
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Rắn săn mồi')
+
+# Hàm vẽ rắn
+def draw_snake(snake):
+    for segment in snake:
+        pygame.draw.rect(screen, GREEN, pygame.Rect(segment[0], segment[1], SNAKE_SIZE, SNAKE_SIZE))
+
+# Hàm chạy trò chơi
+def game():
+    snake = [(100, 50), (90, 50), (80, 50)]
+    food = (random.randrange(1, (WIDTH//SNAKE_SIZE)) * SNAKE_SIZE, random.randrange(1, (HEIGHT//SNAKE_SIZE)) * SNAKE_SIZE)
+    direction = 'RIGHT'
+    score = 0
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP and direction != 'DOWN':
+                    direction = 'UP'
+                if event.key == pygame.K_DOWN and direction != 'UP':
+                    direction = 'DOWN'
+                if event.key == pygame.K_LEFT and direction != 'RIGHT':
+                    direction = 'LEFT'
+                if event.key == pygame.K_RIGHT and direction != 'LEFT':
+                    direction = 'RIGHT'
+
+        # Di chuyển rắn
+        if direction == 'UP':
+            new_head = (snake[0][0], snake[0][1] - SNAKE_SIZE)
+        if direction == 'DOWN':
+            new_head = (snake[0][0], snake[0][1] + SNAKE_SIZE)
+        if direction == 'LEFT':
+            new_head = (snake[0][0] - SNAKE_SIZE, snake[0][1])
+        if direction == 'RIGHT':
+            new_head = (snake[0][0] + SNAKE_SIZE, snake[0][1])
+
+        snake.insert(0, new_head)
+
+        # Kiểm tra va chạm với tường hoặc bản thân
+        if (snake[0][0] < 0 or snake[0][0] >= WIDTH or
+            snake[0][1] < 0 or snake[0][1] >= HEIGHT or
+            snake[0] in snake[1:]):
+            return
+
+        # Kiểm tra ăn thức ăn
+        if snake[0] == food:
+            score += 1
+            food = (random.randrange(1, (WIDTH//SNAKE_SIZE)) * SNAKE_SIZE, random.randrange(1, (HEIGHT//SNAKE_SIZE)) * SNAKE_SIZE)
+        else:
+            snake.pop()
+
+        # Vẽ lại màn hình
+        screen.fill(WHITE)
+        draw_snake(snake)
+        pygame.draw.rect(screen, RED, pygame.Rect(food[0], food[1], SNAKE_SIZE, SNAKE_SIZE))
+        pygame.display.flip()
+
+        # Giới hạn tốc độ của rắn
+        pygame.time.Clock().tick(SNAKE_SPEED)
+
+# Chạy trò chơi
+if __name__ == '__main__':
+    game()
